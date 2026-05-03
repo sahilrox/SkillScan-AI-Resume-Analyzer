@@ -26,6 +26,7 @@ builder.Services.AddScoped<IEmbeddingService>(sp =>
     var config = sp.GetRequiredService<IConfiguration>();
     var apiKey = config["OpenAI:ApiKey"];
 
+    Console.WriteLine("OPENAI KEY: " + (string.IsNullOrEmpty(apiKey) ? "NULL ❌" : "FOUND ✅"));
     return new EmbeddingService(client, apiKey);
 });
 
@@ -40,6 +41,19 @@ builder.Services.AddScoped<ILLMService>(sp =>
     return new OpenAIService(httpClient, apiKey);
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:3000")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
+
+
+
 var app = builder.Build();
 
 // Configure pipeline
@@ -52,6 +66,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+app.UseCors("AllowFrontend");
 
 // 🔥 THIS enables controllers
 app.MapControllers();

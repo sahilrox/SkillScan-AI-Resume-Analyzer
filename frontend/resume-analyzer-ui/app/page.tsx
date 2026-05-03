@@ -1,65 +1,181 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+
+type AnalysisResult = {
+  similarityScore?: number;
+  analysis?: {
+    score?: number;
+    missingSkills?: string[];
+    strengths?: string[];
+    suggestions?: string[];
+  };
+};
 
 export default function Home() {
+  const [file, setFile] = useState<File | null>(null);
+  const [jd, setJd] = useState("");
+  const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async () => {
+    try {
+      if (!file || !jd.trim()) {
+        alert("Please upload a resume and enter a job description");
+        return;
+      }
+
+      setLoading(true);
+      setResult(null);
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("jobDescription", jd);
+
+      const res = await fetch("http://localhost:5190/api/resume/analyze-file", {
+        method: "POST",
+        body: formData,
+      });
+
+      const text = await res.text();
+      console.log("RAW RESPONSE:", text);
+
+      if (!res.ok) {
+        throw new Error(text);
+      }
+
+      const data: AnalysisResult = JSON.parse(text);
+      console.log("PARSED:", data);
+
+      setResult(data);
+    } catch (error) {
+      console.error(error);
+      alert("Something went wrong. Check console.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-10 text-black">
+      <div className="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow-md">
+        <h1 className="text-3xl font-bold mb-6">AI Resume Analyzer 🚀</h1>
+
+        {/* Upload */}
+        <label className="block mb-2 font-medium">Upload Resume</label>
+        <div className="mb-4">
+          <label className="cursor-pointer bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded inline-block">
+            Choose File
+            <input
+              type="file"
+              accept=".pdf"
+              onChange={(e) => setFile(e.target.files?.[0] || null)}
+              className="hidden"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          </label>
+
+          {file && (
+            <p className="mt-2 text-sm text-gray-600">Selected: {file.name}</p>
+          )}
         </div>
-      </main>
+
+        {/* JD */}
+        <label className="block mb-2 font-medium">Job Description</label>
+        <textarea
+          placeholder="Paste job description here..."
+          className="w-full p-3 border rounded mb-4"
+          rows={6}
+          value={jd}
+          onChange={(e) => setJd(e.target.value)}
+        />
+
+        {/* Button */}
+        <button
+          onClick={handleSubmit}
+          disabled={loading}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded disabled:opacity-50"
+        >
+          {loading ? "Analyzing..." : "Analyze"}
+        </button>
+
+        {result && (
+          <div className="mt-10">
+            <h2 className="text-2xl font-bold mb-6">Results</h2>
+
+            {/* SCORE CARDS */}
+            <div className="grid grid-cols-2 gap-6 mb-8">
+              {/* Similarity */}
+              <div className="bg-white rounded-xl shadow p-5">
+                <p className="text-gray-500 mb-2">Similarity Score</p>
+
+                <div className="w-full bg-gray-200 rounded h-4 mb-2 overflow-hidden">
+                  <div
+                    className={`h-4 rounded transition-all duration-500 ${
+                      (result.similarityScore ?? 0) > 0.75
+                        ? "bg-green-500"
+                        : (result.similarityScore ?? 0) > 0.5
+                          ? "bg-yellow-500"
+                          : "bg-red-500"
+                    }`}
+                    style={{
+                      width: `${(result.similarityScore ?? 0) * 100}%`,
+                    }}
+                  />
+                </div>
+
+                <p className="text-lg font-semibold">
+                  {(result.similarityScore ?? 0).toFixed(2)}
+                </p>
+              </div>
+
+              {/* Match Score */}
+              <div className="bg-white rounded-xl shadow p-5 flex flex-col justify-center items-center">
+                <p className="text-gray-500 mb-2">Match Score</p>
+                <p className="text-4xl font-bold text-blue-600">
+                  {result.analysis?.score ?? "N/A"}
+                </p>
+              </div>
+            </div>
+
+            {/* DETAILS CARDS */}
+            <div className="grid gap-6">
+              {/* Missing Skills */}
+              <div className="bg-white rounded-xl shadow p-5">
+                <h3 className="text-lg font-semibold mb-3">Missing Skills</h3>
+                {result.analysis?.missingSkills?.length ? (
+                  <ul className="list-disc ml-5 text-gray-700">
+                    {result.analysis.missingSkills.map((skill, i) => (
+                      <li key={i}>{skill}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-gray-500">No major gaps detected 🎯</p>
+                )}
+              </div>
+
+              {/* Strengths */}
+              <div className="bg-white rounded-xl shadow p-5">
+                <h3 className="text-lg font-semibold mb-3">Strengths</h3>
+                <ul className="list-disc ml-5 text-gray-700">
+                  {result.analysis?.strengths?.map((s, i) => (
+                    <li key={i}>{s}</li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Suggestions */}
+              <div className="bg-white rounded-xl shadow p-5">
+                <h3 className="text-lg font-semibold mb-3">Suggestions</h3>
+                <ul className="list-disc ml-5 text-gray-700">
+                  {result.analysis?.suggestions?.map((s, i) => (
+                    <li key={i}>{s}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

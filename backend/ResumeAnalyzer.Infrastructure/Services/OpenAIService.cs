@@ -37,6 +37,9 @@ Resume:
 
 Job Description:
 {jd}
+Give a score between 0 and 100 based on relevance.
+Do not give extremely low scores unless the resume is completely unrelated.
+Always return at least 2–3 missing skills if any mismatch exists.
 ";
 
         var requestBody = new
@@ -81,10 +84,42 @@ Job Description:
             throw new Exception($"Invalid OpenAI response: {json}");
         }
 
-        var content = choices[0]
+        var content = doc.RootElement
+            .GetProperty("choices")[0]
             .GetProperty("message")
             .GetProperty("content")
             .GetString();
+
+        if (!string.IsNullOrWhiteSpace(content))
+        {
+            int start = content.IndexOf('{');
+            int end = content.LastIndexOf('}');
+
+            if (start >= 0 && end > start)
+            {
+                content = content.Substring(start, end - start + 1);
+            }
+            else
+            {
+                throw new Exception($"Invalid JSON format from LLM: {content}");
+            }
+        }
+
+        // ✅ ADD FIX HERE 👇
+
+        if (content.StartsWith("```"))
+        {
+            var firstBrace = content.IndexOf("{");
+            var lastBrace = content.LastIndexOf("}");
+
+            if (firstBrace != -1 && lastBrace != -1)
+            {
+                content = content.Substring(firstBrace, lastBrace - firstBrace + 1);
+            }
+        }
+
+        // Optional safety
+        content = content.Trim();
 
         if (string.IsNullOrWhiteSpace(content))
         {

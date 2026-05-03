@@ -10,15 +10,30 @@ public class ResumeAnalyzerService
     private readonly IEmbeddingService _embeddingService;
 
     public ResumeAnalyzerService(
-    ILLMService llmService,
-    IEmbeddingService embeddingService)
+        ILLMService llmService,
+        IEmbeddingService embeddingService)
     {
         _llmService = llmService;
         _embeddingService = embeddingService;
     }
 
-    public async Task<AnalysisResult> AnalyzeAsync(string resume, string jd)
+    public async Task<object> AnalyzeAsync(string resume, string jd)
     {
-        return await _llmService.AnalyzeResumeAsync(resume, jd);
+        // 🔥 Step 1: Get embeddings
+        var resumeEmbedding = await _embeddingService.GetEmbeddingAsync(resume);
+        var jdEmbedding = await _embeddingService.GetEmbeddingAsync(jd);
+
+        // 🔥 Step 2: Calculate similarity
+        var similarity = SimilarityHelper.CosineSimilarity(resumeEmbedding, jdEmbedding);
+
+        // 🔥 Step 3: Get LLM analysis
+        var analysis = await _llmService.AnalyzeResumeAsync(resume, jd);
+
+        // 🔥 Step 4: Return combined response
+        return new
+        {
+            similarityScore = similarity,
+            analysis = analysis
+        };
     }
 }
