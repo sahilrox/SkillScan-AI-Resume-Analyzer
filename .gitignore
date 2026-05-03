@@ -1,0 +1,21 @@
+# .NET
+bin/
+obj/
+
+# Node
+node_modules/
+
+# Python
+venv/
+__pycache__/
+
+# Secrets
+appsettings.Development.json
+*.env
+
+# Editor
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
