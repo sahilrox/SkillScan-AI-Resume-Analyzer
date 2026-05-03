@@ -59,7 +59,12 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-10 text-black">
       <div className="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow-md">
-        <h1 className="text-3xl font-bold mb-6">AI Resume Analyzer 🚀</h1>
+        <h1 className="text-3xl font-bold mb-2">AI Resume Analyzer 🚀</h1>
+
+        <p className="text-gray-600 mb-6">
+          Upload your resume and compare it against a job description using AI +
+          semantic matching.
+        </p>
 
         {/* Upload */}
         <label className="block mb-2 font-medium">Upload Resume</label>
@@ -93,7 +98,7 @@ export default function Home() {
         <button
           onClick={handleSubmit}
           disabled={loading}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded disabled:opacity-50"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded disabled:opacity-50 transition"
         >
           {loading ? "Analyzing..." : "Analyze"}
         </button>
