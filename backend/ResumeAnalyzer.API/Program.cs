@@ -46,9 +46,12 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend",
         policy =>
         {
-            policy.WithOrigins("http://localhost:3000")
-                  .AllowAnyHeader()
-                  .AllowAnyMethod();
+            policy.WithOrigins(
+                "http://localhost:3000",
+                "https://ai-resume-analyzer-8ovhu2327-sahilroxs-projects.vercel.app"
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod();
         });
 });
 
@@ -63,7 +66,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseAuthorization();
 app.UseCors("AllowFrontend");
