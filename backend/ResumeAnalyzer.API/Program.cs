@@ -56,18 +56,20 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Configure pipeline
-
+// Swagger
 app.UseSwagger();
 app.UseSwaggerUI();
 
+// ✅ REQUIRED for proper endpoint + CORS handling
+app.UseRouting();
 
-//app.UseHttpsRedirection();
+// ✅ CORS MUST come after UseRouting
 app.UseCors("AllowFrontend");
+
+// (Optional but fine)
 app.UseAuthorization();
 
-
-// 🔥 THIS enables controllers
+// ✅ Map controllers AFTER CORS
 app.MapControllers();
 
 app.Run();

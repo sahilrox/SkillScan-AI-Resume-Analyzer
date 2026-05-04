@@ -3,7 +3,7 @@ using ResumeAnalyzer.Application.Services;
 using ResumeAnalyzer.Infrastructure.Services;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/resume")]
 public class ResumeController : ControllerBase
 {
     private readonly ResumeAnalyzerService _service;
