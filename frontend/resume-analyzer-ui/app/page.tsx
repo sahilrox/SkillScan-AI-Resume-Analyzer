@@ -33,7 +33,7 @@ export default function Home() {
       formData.append("jobDescription", jobDescription);
 
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/Resume/analyze-file`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/resume/analyze-file`,
         {
           method: "POST",
           body: formData,
