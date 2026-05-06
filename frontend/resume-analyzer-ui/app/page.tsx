@@ -194,37 +194,60 @@ export default function Home() {
 
            {/* Missing Skills */}
            <div className="bg-white shadow-md rounded-xl p-5 border mb-4">
-             <h3 className="text-lg font-semibold mb-2">Missing Skills</h3>
+             <h3 className="text-lg font-semibold mb-3 text-red-600">
+               ⚠️ Missing Skills
+             </h3>
 
              {result.analysis?.missingSkills?.length ? (
-               <ul className="list-disc pl-5 text-gray-700">
+               <ul className="space-y-2">
                  {result.analysis.missingSkills.map((skill, i) => (
-                   <li key={i}>{skill}</li>
+                   <li
+                     key={i}
+                     className="bg-red-50 text-red-700 px-3 py-2 rounded-lg text-sm"
+                   >
+                     ❌ {skill}
+                   </li>
                  ))}
                </ul>
              ) : (
-               <p className="text-gray-500">None 🎯</p>
+               <p className="text-green-600 font-medium">
+                 ✅ No major gaps detected
+               </p>
              )}
            </div>
 
            {/* Strengths */}
            <div className="bg-white shadow-md rounded-xl p-5 border mb-4">
-             <h3 className="text-lg font-semibold mb-2">Strengths</h3>
+             <h3 className="text-lg font-semibold mb-3 text-green-600">
+               💪 Strengths
+             </h3>
 
-             <ul className="list-disc pl-5 text-gray-700">
+             <ul className="space-y-2">
                {result.analysis?.strengths?.map((s, i) => (
-                 <li key={i}>{s}</li>
+                 <li
+                   key={i}
+                   className="bg-green-50 text-green-700 px-3 py-2 rounded-lg text-sm"
+                 >
+                   ✅ {s}
+                 </li>
                ))}
              </ul>
            </div>
 
            {/* Suggestions */}
            <div className="bg-white shadow-md rounded-xl p-5 border">
-             <h3 className="text-lg font-semibold mb-2">Suggestions</h3>
+             <h3 className="text-lg font-semibold mb-3 text-blue-600">
+               🚀 Suggestions
+             </h3>
 
-             <ul className="list-disc pl-5 text-gray-700">
+             <ul className="space-y-2">
                {result.analysis?.suggestions?.map((s, i) => (
-                 <li key={i}>{s}</li>
+                 <li
+                   key={i}
+                   className="bg-blue-50 text-blue-700 px-3 py-2 rounded-lg text-sm"
+                 >
+                   👉 {s}
+                 </li>
                ))}
              </ul>
            </div>
