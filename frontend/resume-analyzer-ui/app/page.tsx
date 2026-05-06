@@ -18,6 +18,13 @@ export default function Home() {
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const getScoreColor = (score?: number) => {
+    if (score === undefined) return "text-gray-400";
+    if (score < 50) return "text-red-500";
+    if (score < 75) return "text-yellow-500";
+    return "text-green-500";
+  };
+
   const handleSubmit = async () => {
     try {
       if (!file || !jobDescription.trim()) {
@@ -47,7 +54,7 @@ export default function Home() {
 
       const data = await res.json();
       setResult(data);
-      
+
     } catch (error) {
       console.error(error);
       alert("Something went wrong. Check console.");
@@ -59,12 +66,17 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-10 text-black">
       <div className="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow-md">
-        <h1 className="text-3xl font-bold mb-2">AI Resume Analyzer 🚀</h1>
+        <h1 className="text-3xl font-bold mb-2">SkillScan AI 🚀</h1>
 
-        <p className="text-gray-600 mb-6">
-          Upload your resume and compare it against a job description using AI +
-          semantic matching.
+        <p className="text-gray-500 mb-4">
+          AI-powered resume analysis with semantic matching
         </p>
+
+        {!result && (
+          <p className="text-gray-500 mt-6 text-center">
+            Upload your resume and analyze against a job description 🚀
+          </p>
+        )}
 
         {/* Upload */}
         <label className="block mb-2 font-medium">Upload Resume</label>
@@ -98,19 +110,23 @@ export default function Home() {
         <button
           onClick={handleSubmit}
           disabled={loading}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded disabled:opacity-50 transition"
+          className={`px-4 py-2 rounded-lg text-white font-medium transition ${
+            loading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-blue-600 hover:bg-blue-700"
+          }`}
         >
           {loading ? "Analyzing..." : "Analyze"}
         </button>
 
         {result && (
-          <div className="mt-10">
+          <div className="mt-8 transition-all duration-500 ease-in-out animate-fade-in">
             <h2 className="text-2xl font-bold mb-6">Results</h2>
 
             {/* SCORE CARDS */}
             <div className="grid grid-cols-2 gap-6 mb-8">
               {/* Similarity */}
-              <div className="bg-white rounded-xl shadow p-5">
+              <div className="bg-white shadow-md rounded-xl p-5 border border-gray-200 mb-4 transition-all duration-300 hover:shadow-lg">
                 <p className="text-gray-500 mb-2">Similarity Score</p>
 
                 <div className="w-full bg-gray-200 rounded h-4 mb-2 overflow-hidden">
@@ -128,16 +144,20 @@ export default function Home() {
                   />
                 </div>
 
-                <p className="text-lg font-semibold">
-                  {(result.similarityScore ?? 0).toFixed(2)}
+                <p>
+                  {result?.similarityScore !== undefined
+                    ? result.similarityScore.toFixed(2)
+                    : "N/A"}
                 </p>
               </div>
 
               {/* Match Score */}
-              <div className="bg-white rounded-xl shadow p-5 flex flex-col justify-center items-center">
+              <div className="bg-white shadow-md rounded-xl p-5 border border-gray-200 mb-4 transition-all duration-300 hover:shadow-lg">
                 <p className="text-gray-500 mb-2">Match Score</p>
-                <p className="text-4xl font-bold text-blue-600">
-                  {result.analysis?.score ?? "N/A"}
+                <p
+                  className={`text-4xl font-bold ${getScoreColor(result.analysis?.score)}`}
+                >
+                  {result.analysis?.score}
                 </p>
               </div>
             </div>
@@ -145,7 +165,7 @@ export default function Home() {
             {/* DETAILS CARDS */}
             <div className="grid gap-6">
               {/* Missing Skills */}
-              <div className="bg-white rounded-xl shadow p-5">
+              <div className="bg-white shadow-md rounded-xl p-5 border border-gray-200 mb-4 transition-all duration-300 hover:shadow-lg">
                 <h3 className="text-lg font-semibold mb-3">Missing Skills</h3>
                 {result.analysis?.missingSkills?.length ? (
                   <ul className="list-disc ml-5 text-gray-700">
@@ -159,7 +179,7 @@ export default function Home() {
               </div>
 
               {/* Strengths */}
-              <div className="bg-white rounded-xl shadow p-5">
+              <div className="bg-white shadow-md rounded-xl p-5 border border-gray-200 mb-4 transition-all duration-300 hover:shadow-lg">
                 <h3 className="text-lg font-semibold mb-3">Strengths</h3>
                 <ul className="list-disc ml-5 text-gray-700">
                   {result.analysis?.strengths?.map((s, i) => (
@@ -169,7 +189,7 @@ export default function Home() {
               </div>
 
               {/* Suggestions */}
-              <div className="bg-white rounded-xl shadow p-5">
+              <div className="bg-white shadow-md rounded-xl p-5 border border-gray-200 mb-4 transition-all duration-300 hover:shadow-lg">
                 <h3 className="text-lg font-semibold mb-3">Suggestions</h3>
                 <ul className="list-disc ml-5 text-gray-700">
                   {result.analysis?.suggestions?.map((s, i) => (
