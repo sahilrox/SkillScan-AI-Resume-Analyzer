@@ -31,16 +31,23 @@ public class ResumeController : ControllerBase
     [FromServices] ResumeParserService parser
 )
     {
-        using var stream = file.OpenReadStream();
+        try
+        {
+            using var stream = file.OpenReadStream();
 
-        var resumeText = await parser.ParseResumeAsync(
-            stream,
-            file.FileName,
-            file.ContentType
-        );
+            var resumeText = await parser.ParseResumeAsync(
+                stream,
+                file.FileName,
+                file.ContentType
+            );
 
-        var result = await _service.AnalyzeAsync(resumeText, jobDescription);
+            var result = await _service.AnalyzeAsync(resumeText, jobDescription);
 
-        return Ok(result);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"ERROR: {ex.Message}");
+        }
     }
 }
