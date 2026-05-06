@@ -17,6 +17,7 @@ export default function Home() {
   const [jobDescription, setJobDescription] = useState("");
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>("");
 
   const getScoreColor = (score?: number) => {
     if (score === undefined) return "text-gray-400";
@@ -54,153 +55,182 @@ export default function Home() {
 
       const data = await res.json();
       setResult(data);
-
-    } catch (error) {
-      console.error(error);
-      alert("Something went wrong. Check console.");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Something went wrong");
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-10 text-black">
-      <div className="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow-md">
-        <h1 className="text-3xl font-bold mb-2">SkillScan AI 🚀</h1>
+ return (
+   <div className="min-h-screen bg-gray-100 py-10 px-4">
+     <div className="max-w-4xl mx-auto">
+       {/* Header */}
+       <div className="text-center mb-8">
+         <h1 className="text-4xl font-bold text-gray-900">SkillScan AI 🚀</h1>
+         <p className="text-gray-500 mt-2">
+           AI-powered resume analysis with semantic matching
+         </p>
+         <p className="text-gray-400 mt-2 text-sm">
+           Upload your resume and analyze it against a job description 🚀
+         </p>
+       </div>
 
-        <p className="text-gray-500 mb-4">
-          AI-powered resume analysis with semantic matching
-        </p>
+       {/* Input Card */}
+       <div className="bg-white shadow-lg rounded-xl p-6 border border-gray-200">
+         {/* Upload Resume */}
+         <div className="mb-5">
+           <label
+             htmlFor="resume-upload"
+             className="block font-medium mb-2 text-gray-700"
+           >
+             Upload Resume
+           </label>
 
-        {!result && (
-          <p className="text-gray-500 mt-6 text-center">
-            Upload your resume and analyze against a job description 🚀
-          </p>
-        )}
+           <input
+             id="resume-upload"
+             type="file"
+             onChange={(e) => setFile(e.target.files?.[0] || null)}
+             className="block w-full text-sm text-gray-700
+             file:mr-4 file:py-2 file:px-4
+             file:rounded-lg file:border-0
+             file:text-sm file:font-medium
+             file:bg-blue-50 file:text-blue-600
+             hover:file:bg-blue-100
+             cursor-pointer"
+           />
+           {file && (
+             <p className="text-sm text-gray-500 mt-2">Selected: {file.name}</p>
+           )}
+         </div>
 
-        {/* Upload */}
-        <label className="block mb-2 font-medium">Upload Resume</label>
-        <div className="mb-4">
-          <label className="cursor-pointer bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded inline-block">
-            Choose File
-            <input
-              type="file"
-              accept=".pdf"
-              onChange={(e) => setFile(e.target.files?.[0] || null)}
-              className="hidden"
-            />
-          </label>
+         {/* Job Description */}
+         <div className="mb-5">
+           <label className="block font-medium mb-2 text-gray-700">
+             Job Description
+           </label>
+           <textarea
+             id="job-description"
+             value={jobDescription}
+             onChange={(e) => setJobDescription(e.target.value)}
+             placeholder="Paste job description here..."
+             className="w-full border border-gray-300 rounded-xl p-4 h-44 bg-white text-gray-800 placeholder-gray-400 
+             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
+             transition duration-200 shadow-sm"
+           />
+         </div>
 
-          {file && (
-            <p className="mt-2 text-sm text-gray-600">Selected: {file.name}</p>
-          )}
-        </div>
+         {/* Button */}
+         <div className="flex justify-center">
+           <button
+             onClick={handleSubmit}
+             disabled={loading}
+             className={`px-8 py-3 rounded-xl text-white font-semibold text-lg
+    transition-all duration-300 shadow-md
+    ${
+      loading
+        ? "bg-gray-400 cursor-not-allowed"
+        : "bg-blue-600 hover:bg-blue-700 hover:scale-105 active:scale-95"
+    }`}
+           >
+             {loading ? "Analyzing..." : "Analyze 🚀"}
+           </button>
+         </div>
 
-        {/* JD */}
-        <label className="block mb-2 font-medium">Job Description</label>
-        <textarea
-          placeholder="Paste job description here..."
-          className="w-full p-3 border rounded mb-4"
-          rows={6}
-          value={jobDescription}
-          onChange={(e) => setJobDescription(e.target.value)}
-        />
+         {/* Error */}
+         {error && <p className="text-red-500 text-center mt-4">{error}</p>}
+       </div>
 
-        {/* Button */}
-        <button
-          onClick={handleSubmit}
-          disabled={loading}
-          className={`px-4 py-2 rounded-lg text-white font-medium transition ${
-            loading
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-blue-600 hover:bg-blue-700"
-          }`}
-        >
-          {loading ? "Analyzing..." : "Analyze"}
-        </button>
+       {/* Results */}
+       {result && (
+         <div className="mt-8 transition-all duration-500 ease-in-out animate-fade-in">
+           <h2 className="text-2xl font-bold mb-4">Results</h2>
 
-        {result && (
-          <div className="mt-8 transition-all duration-500 ease-in-out animate-fade-in">
-            <h2 className="text-2xl font-bold mb-6">Results</h2>
+           {/* Scores */}
+           <div className="grid md:grid-cols-2 gap-4 mb-6">
+             {/* Similarity */}
+             <div className="bg-white shadow-md rounded-xl p-5 border">
+               <p className="text-gray-500 mb-2">Similarity Score</p>
 
-            {/* SCORE CARDS */}
-            <div className="grid grid-cols-2 gap-6 mb-8">
-              {/* Similarity */}
-              <div className="bg-white shadow-md rounded-xl p-5 border border-gray-200 mb-4 transition-all duration-300 hover:shadow-lg">
-                <p className="text-gray-500 mb-2">Similarity Score</p>
+               <div className="w-full bg-gray-200 rounded-full h-3 mb-2">
+                 <div
+                   className="h-3 rounded-full bg-gradient-to-r from-yellow-400 to-green-500"
+                   style={{
+                     width: `${(result.similarityScore ?? 0) * 100}%`,
+                   }}
+                 />
+               </div>
 
-                <div className="w-full bg-gray-200 rounded h-4 mb-2 overflow-hidden">
-                  <div
-                    className={`h-4 rounded transition-all duration-500 ${
-                      (result.similarityScore ?? 0) > 0.75
-                        ? "bg-green-500"
-                        : (result.similarityScore ?? 0) > 0.5
-                          ? "bg-yellow-500"
-                          : "bg-red-500"
-                    }`}
-                    style={{
-                      width: `${(result.similarityScore ?? 0) * 100}%`,
-                    }}
-                  />
-                </div>
+               <p className="font-semibold">
+                 {result.similarityScore !== undefined
+                   ? result.similarityScore.toFixed(2)
+                   : "N/A"}
+               </p>
+             </div>
 
-                <p>
-                  {result?.similarityScore !== undefined
-                    ? result.similarityScore.toFixed(2)
-                    : "N/A"}
-                </p>
-              </div>
+             {/* Match Score */}
+             <div className="bg-white shadow-md rounded-xl p-5 border text-center">
+               <p className="text-gray-500 mb-2">Match Score</p>
 
-              {/* Match Score */}
-              <div className="bg-white shadow-md rounded-xl p-5 border border-gray-200 mb-4 transition-all duration-300 hover:shadow-lg">
-                <p className="text-gray-500 mb-2">Match Score</p>
-                <p
-                  className={`text-4xl font-bold ${getScoreColor(result.analysis?.score)}`}
-                >
-                  {result.analysis?.score}
-                </p>
-              </div>
-            </div>
+               <p
+                 className={`text-4xl font-bold ${
+                   result.analysis?.score === undefined
+                     ? "text-gray-400"
+                     : result.analysis.score < 50
+                       ? "text-red-500"
+                       : result.analysis.score < 75
+                         ? "text-yellow-500"
+                         : "text-green-500"
+                 }`}
+               >
+                 {result.analysis?.score ?? "N/A"}
+               </p>
+             </div>
+           </div>
 
-            {/* DETAILS CARDS */}
-            <div className="grid gap-6">
-              {/* Missing Skills */}
-              <div className="bg-white shadow-md rounded-xl p-5 border border-gray-200 mb-4 transition-all duration-300 hover:shadow-lg">
-                <h3 className="text-lg font-semibold mb-3">Missing Skills</h3>
-                {result.analysis?.missingSkills?.length ? (
-                  <ul className="list-disc ml-5 text-gray-700">
-                    {result.analysis.missingSkills.map((skill, i) => (
-                      <li key={i}>{skill}</li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-gray-500">No major gaps detected 🎯</p>
-                )}
-              </div>
+           {/* Missing Skills */}
+           <div className="bg-white shadow-md rounded-xl p-5 border mb-4">
+             <h3 className="text-lg font-semibold mb-2">Missing Skills</h3>
 
-              {/* Strengths */}
-              <div className="bg-white shadow-md rounded-xl p-5 border border-gray-200 mb-4 transition-all duration-300 hover:shadow-lg">
-                <h3 className="text-lg font-semibold mb-3">Strengths</h3>
-                <ul className="list-disc ml-5 text-gray-700">
-                  {result.analysis?.strengths?.map((s, i) => (
-                    <li key={i}>{s}</li>
-                  ))}
-                </ul>
-              </div>
+             {result.analysis?.missingSkills?.length ? (
+               <ul className="list-disc pl-5 text-gray-700">
+                 {result.analysis.missingSkills.map((skill, i) => (
+                   <li key={i}>{skill}</li>
+                 ))}
+               </ul>
+             ) : (
+               <p className="text-gray-500">None 🎯</p>
+             )}
+           </div>
 
-              {/* Suggestions */}
-              <div className="bg-white shadow-md rounded-xl p-5 border border-gray-200 mb-4 transition-all duration-300 hover:shadow-lg">
-                <h3 className="text-lg font-semibold mb-3">Suggestions</h3>
-                <ul className="list-disc ml-5 text-gray-700">
-                  {result.analysis?.suggestions?.map((s, i) => (
-                    <li key={i}>{s}</li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
+           {/* Strengths */}
+           <div className="bg-white shadow-md rounded-xl p-5 border mb-4">
+             <h3 className="text-lg font-semibold mb-2">Strengths</h3>
+
+             <ul className="list-disc pl-5 text-gray-700">
+               {result.analysis?.strengths?.map((s, i) => (
+                 <li key={i}>{s}</li>
+               ))}
+             </ul>
+           </div>
+
+           {/* Suggestions */}
+           <div className="bg-white shadow-md rounded-xl p-5 border">
+             <h3 className="text-lg font-semibold mb-2">Suggestions</h3>
+
+             <ul className="list-disc pl-5 text-gray-700">
+               {result.analysis?.suggestions?.map((s, i) => (
+                 <li key={i}>{s}</li>
+               ))}
+             </ul>
+           </div>
+         </div>
+       )}
+     </div>
+   </div>
+ );
+};
